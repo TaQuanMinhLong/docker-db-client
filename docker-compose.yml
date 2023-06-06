@@ -1,0 +1,44 @@
+version: "3.8"
+
+services:
+  prisma:
+    build: ./
+    container_name: prisma
+    env_file:
+      - ./.env
+    ports:
+      - "5555:5555"
+    depends_on:
+      - postgres
+    networks:
+      - db_client
+  postgres:
+    image: postgres:alpine
+    container_name: postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - ../data/main:/var/lib/postgresql/data
+    networks:
+      - db_client
+  redis:
+    image: redis:alpine
+    container_name: redis
+    command: redis-server
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - ../data/cache:/data
+    networks:
+      - db_client
+
+networks:
+  db_client:
+    name: db_client
+    driver: bridge

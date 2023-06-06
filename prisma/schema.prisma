@@ -1,0 +1,60 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+enum Region {
+    NORTH
+    SOUTH
+    CENTRAL
+}
+
+enum Status {
+    DONE
+    ACTIVE
+    ONGOING
+    PENDING
+    AWAITING
+    CANCELLED
+}
+
+model User {
+    id            String         @id @default(uuid())
+    employeeId    String         @unique
+    email         String         @unique
+    fullName      String
+    level         Int
+    position      String
+    storeId       String
+    storeName     String
+    region        Region
+    active        Boolean        @default(true)
+    isCoach       Boolean        @default(false)
+    supervisor    User?          @relation("SupervisorSubordinates", fields: [supervisorId], references: [id])
+    supervisorId  String?
+    subordinates  User[]         @relation("SupervisorSubordinates")
+    owned_plan    CoachingPlan[] @relation("OwnedPlan")
+    assigned_plan CoachingPlan[]
+}
+
+model CoachingPlan {
+    id                String   @id @default(cuid())
+    owner             User     @relation("OwnedPlan", fields: [ownerId], references: [id])
+    ownerId           String
+    coachee           User     @relation(fields: [coacheeId], references: [employeeId])
+    coacheeId         String
+    topic             String
+    time_from         DateTime @default(now())
+    time_to           DateTime
+    reason            String
+    status            Status   @default(ACTIVE)
+    secret_key        String   @unique
+    isValid           Boolean  @default(true)
+    rating            Int?
+    feedback_improve  String?
+    feedback_maintain String?
+}
