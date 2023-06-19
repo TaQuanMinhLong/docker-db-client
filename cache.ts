@@ -46,6 +46,7 @@ export function createCacheInstance() {
   }
 
   function del(key: string) {
+    const query = db.query("SELECT COUNT(*) FROM key_value_store WHERE key LIKE ? || '%")
     const isHashKey = key.split(".").length > 1;
     isHashKey
       ? db.run(`DELETE FROM key_value_store WHERE key LIKE ? || '%';`, [key])
